@@ -1,7 +1,7 @@
 Message ::= Preamble? Variant+
 
 /* Preamble */
-Preamble ::= '{' Selector* '}'
+Preamble ::= Selector*
 Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */

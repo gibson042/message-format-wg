@@ -5,6 +5,7 @@
 
 |   Date   | Description |
 |----------|-------------|
+|2022-04-27|Remove explicit braces from preamble.|
 |2022-04-27|Require escaping for `}` in message text.|
 |2022-04-27|Remove all comments and UnicodeEscape.|
 |2022-04-15|Rename aliases to local variables.|
@@ -181,26 +182,26 @@ which the runtime can use to construct a document tree structure for a UI framew
 
 A message with a single selector:
 
-    {{$count: number}}
+    {$count: number}
         one [You have one notification.]
         _ [You have {$count} notifications.]
 
 A message with a single selector which is an invocation of
 a custom function `platform`, formatted on a single line:
 
-    {{:platform}} windows [Settings] _ [Preferences]
+    {:platform} windows [Settings] _ [Preferences]
 
 A message with a single selector and a custom `hasCase` function
 which allows the message to query for presence of grammatical cases required for each variant:
 
-    {{$userName: hasCase}}
+    {$userName: hasCase}
         vocative [Hello, {$userName: person case=vocative}!]
         accusative [Please welcome {$userName: person case=accusative}!]
         _ [Hello!]
 
 A message with 2 selectors:
 
-    {{$photoCount: number}} {$userGender: equals}}
+    {$photoCount: number} {$userGender: equals}
         one masculine [{$userName} added a new photo to his album.]
         one feminine [{$userName} added a new photo to her album.]
         one _ [{$userName} added a new photo to their album.]
@@ -212,16 +213,14 @@ A message with 2 selectors:
 
 A message defining a local variable `$whom` which is then used twice inside the pattern:
 
-    {$whom = {$monster: noun case=accusative}}
+    $whom = {$monster: noun case=accusative}
     [You see {$quality: adjective article=indefinite accord=$whom} {$whom}!]
 
 A message defining two local variables:
 `$itemAcc` and `$countInt`, and using `$countInt` as a selector:
 
-    {
-        $countInt = {$count: number maximumFractionDigits=0}
-        $itemAcc = {$item: noun count=$count case=accusative}
-    }
+    $countInt = {$count: number maximumFractionDigits=0}
+    $itemAcc = {$item: noun count=$count case=accusative}
         one [You bought {$color: adjective article=indefinite accord=$itemAcc} {$itemAcc}.]
         _ [You bought {$countInt} {$color: adjective accord=$itemAcc} {$itemAcc}.]
 
@@ -229,14 +228,13 @@ A message defining two local variables:
 
 A complex message with 2 selectors and 3 local variable definitions:
 
-    {
-        {$host: gender}
-        {$guestOther: number}
+    {$host: gender}
+    {$guestOther: number}
 
-        $hostName = {$host: person firstName=long}
-        $guestName = {$guest: person firstName=long}
-        $guestsOther = {$guestCount: number offset=1}
-    }
+    $hostName = {$host: person firstName=long}
+    $guestName = {$guest: person firstName=long}
+    $guestsOther = {$guestCount: number offset=1}
+
         female 0 [{$hostName} does not give a party.]
         female 1 [{$hostName} invites {$guestName} to her party.]
         female 2 [{$hostName} invites {$guestName} and one other person to her party.]
@@ -272,7 +270,7 @@ MessageFormat 2.0 improves upon the ICU MessageFormat 1.0 syntax through the fol
 
     MessageFormat 2.0:
     ```
-    {{$foo: func} {$bar: func}}
+    {$foo: func} {$bar: func}
         foo1 [Value 1]
         foo2 bar1 [Value 2a]
         foo2 bar2 [Value 2b]
@@ -327,14 +325,14 @@ A selector is an expression which will be used to choose one of the variants dur
 A selector can be optionally bound to a local variable, which may then be used in other expressions.
 
 ```ebnf
-Preamble ::= '{' Selector* '}'
+Preamble ::= Selector*
 Selector ::= (Variable '=')? '{' Expression '}'
 ```
 
 Examples:
 
 ```
-{$frac = {$count: number minFractionDigits=2}}
+$frac = {$count: number minFractionDigits=2}
     one [One apple]
     _ [{$frac} apples]
 ```
@@ -549,7 +547,7 @@ The grammar is an LL(1) grammar without backtracking.
 Message ::= Preamble? Variant+
 
 /* Preamble */
-Preamble ::= '{' Selector* '}'
+Preamble ::= Selector*
 Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */
