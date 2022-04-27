@@ -5,6 +5,7 @@
 
 |   Date   | Description |
 |----------|-------------|
+|2022-04-27|Add plain messages.|
 |2022-04-27|Remove explicit braces from preamble.|
 |2022-04-27|Require escaping for `}` in message text.|
 |2022-04-27|Remove all comments and UnicodeEscape.|
@@ -50,6 +51,7 @@
 1. [Comparison with ICU MessageFormat 1.0](#comparison-with-icu-messageformat-10)
 1. [Productions](#productions)
     1. [Message](#message)
+    1. [Plain](#plain)
     1. [Preamble](#preamble)
     1. [Variants](#variants)
     1. [Patterns](#patterns)
@@ -100,6 +102,9 @@ The design goals of the syntax specification are as follows:
    `.properties`, YAML, XML, inlined as string literals in programming languages, etc.
    This includes a future _MessageResource_ specification.
 
+1. Simple messages that do not use any placeholders or selectors should (as far as possible)
+   be represented in the syntax with no additional characters than their actual contents.
+
 ### Design Restrictions
 
 The syntax specification takes into account the following design restrictions:
@@ -117,26 +122,27 @@ The syntax specification takes into account the following design restrictions:
 
 ### Simple Messages
 
-A simple message without any variables:
+A simple message without any variables does not need any syntax:
 
-    [Hello, world!]
+    Hello, world!
 
 The same message defined in a `.properties` file:
 
 ```properties
-app.greetings.hello = [Hello, world!]
+app.greetings.hello = Hello, world!
 ```
 
 The same message defined inline in JavaScript:
 
 ```js
-let hello = new MessageFormat("[Hello, world!]");
+let hello = new MessageFormat("Hello, world!");
 hello.format();
 ```
 
 ### Simple Placeholders
 
-A message with an interpolated variable:
+A message with an interpolated variable needs to be interpreted as a pattern,
+which uses `[…]` delimiters:
 
     [Hello, {$userName}!]
 
@@ -311,11 +317,25 @@ if it meets additional semantic requirements about its structure, defined below.
 
 ### Message
 
-A single message consists of an optional preamble,
-and one or more variants which represent the translatable body of the message.
+A single message is either a plain message, a single pattern, or has a preamble
+followed by one or more variants which represent the translatable body of the message.
 
 ```ebnf
-Message ::= Preamble? Variant+
+Message ::= Plain | Pattern | Preamble Variant+
+```
+
+### Plain
+
+A plain message only contains translatable content.
+Plain messages must not start with one of the syntax characters `[`, `{` or `$`.
+Any whitespace at the beginning or end of a plain message is ignored.
+A plain message cannot represent an empty string;
+for that, use an empty pattern `[]` instead.
+
+```ebnf
+Plain ::= PlainStart (AnyChar* PlainEnd)?  /* ws: explicit */
+PlainStart ::= AnyChar - ('[' | '{' | '$' | WhiteSpace)
+PlainEnd ::= AnyChar - WhiteSpace
 ```
 
 ### Preamble
@@ -325,7 +345,7 @@ A selector is an expression which will be used to choose one of the variants dur
 A selector can be optionally bound to a local variable, which may then be used in other expressions.
 
 ```ebnf
-Preamble ::= Selector*
+Preamble ::= Selector+
 Selector ::= (Variable '=')? '{' Expression '}'
 ```
 
@@ -544,10 +564,10 @@ The following EBNF uses the [W3C flavor](https://www.w3.org/TR/xml/#sec-notation
 The grammar is an LL(1) grammar without backtracking.
 
 ```ebnf
-Message ::= Preamble? Variant+
+Message ::= Plain | Pattern | Preamble Variant+
 
 /* Preamble */
-Preamble ::= Selector*
+Preamble ::= Selector+
 Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */
@@ -572,6 +592,11 @@ MarkupEnd ::= '/' Name
 Ignore ::= WhiteSpace /* ws: definition */
 
 <?TOKENS?>
+
+/* Plain */
+Plain ::= PlainStart (AnyChar* PlainEnd)?  /* ws: explicit */
+PlainStart ::= AnyChar - ('[' | '{' | '$' | WhiteSpace)
+PlainEnd ::= AnyChar - WhiteSpace
 
 /* Text */
 Text ::= (TextChar | TextEscape)+

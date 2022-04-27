@@ -1,7 +1,7 @@
-Message ::= Preamble? Variant+
+Message ::= Plain | Pattern | Preamble Variant+
 
 /* Preamble */
-Preamble ::= Selector*
+Preamble ::= Selector+
 Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */
@@ -23,6 +23,11 @@ MarkupStart ::= Name Option*
 MarkupEnd ::= '/' Name
 
 <?TOKENS?>
+
+/* Plain */
+Plain ::= PlainStart (AnyChar* PlainEnd)?  /* ws: explicit */
+PlainStart ::= AnyChar - ('[' | '{' | '$' | WhiteSpace)
+PlainEnd ::= AnyChar - WhiteSpace
 
 /* Text */
 Text ::= (TextChar | TextEscape)+
