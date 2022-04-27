@@ -26,7 +26,7 @@ MarkupEnd ::= '/' Name
 
 /* Text */
 Text ::= (TextChar | TextEscape)+
-TextChar ::= AnyChar - ('[' | ']' | '{' | Esc)
+TextChar ::= AnyChar - ('[' | ']' | '{' | '}' | Esc)
 AnyChar ::= .
 
 /* Names */
@@ -47,7 +47,7 @@ StringChar ::= AnyChar - ('"'| Esc)
 
 /* Escape sequences */
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | Esc '}'
 StringEscape ::= Esc Esc | Esc '"'
 
 /* WhiteSpace */

@@ -5,6 +5,7 @@
 
 |   Date   | Description |
 |----------|-------------|
+|2022-04-27|Require escaping for `}` in message text.|
 |2022-04-27|Remove all comments and UnicodeEscape.|
 |2022-04-15|Rename aliases to local variables.|
 |2022-04-15|Allow empty placeables.|
@@ -466,12 +467,12 @@ The grammar defines the following tokens for the purpose of the lexical analysis
 Text is the translatable content of a _pattern_.
 Any Unicode codepoint is allowed in text, with the exception of
 `[` and `]` (which delimit patterns),
-`{` (which starts a placeholder),
+`{` and `}` (which delimit placeholders),
 and `\` (which starts an escape sequence).
 
 ```ebnf
 Text ::= (TextChar | TextEscape)+ /* ws: explicit */
-TextChar ::= AnyChar - ('[' | ']' | '{' | Esc)
+TextChar ::= AnyChar - ('[' | ']' | '{' | '}' | Esc)
 AnyChar ::= .
 ```
 
@@ -523,7 +524,7 @@ They are allowed in translatable text as well as in string literals.
 
 ```ebnf
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | Esc '}'
 StringEscape ::= Esc Esc | Esc '"'
 ```
 
@@ -576,7 +577,7 @@ Ignore ::= WhiteSpace /* ws: definition */
 
 /* Text */
 Text ::= (TextChar | TextEscape)+
-TextChar ::= AnyChar - ('[' | ']' | '{' | Esc)
+TextChar ::= AnyChar - ('[' | ']' | '{' | '}' | Esc)
 AnyChar ::= .
 
 /* Names */
@@ -597,7 +598,7 @@ StringChar ::= AnyChar - ('"'| Esc)
 
 /* Escape sequences */
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | Esc '}'
 StringEscape ::= Esc Esc | Esc '"'
 
 /* WhiteSpace */
