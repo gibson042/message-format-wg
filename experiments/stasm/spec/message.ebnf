@@ -1,8 +1,8 @@
-Message ::= DocComment? Preamble? Variant+
+Message ::= Preamble? Variant+
 
 /* Preamble */
 Preamble ::= '{' Selector* '}'
-Selector ::= DocComment? (Variable '=')? '{' Expression '}'
+Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */
 Variant ::= VariantKey* Pattern
@@ -21,9 +21,6 @@ Option ::= Name '=' (String | Nmtoken | Variable)
 /* Markup Tags */
 MarkupStart ::= Name Option*
 MarkupEnd ::= '/' Name
-
-/* Ignored tokens */
-Ignore ::= AnyComment | WhiteSpace /* ws: definition */
 
 <?TOKENS?>
 
@@ -50,16 +47,8 @@ StringChar ::= AnyChar - ('"'| Esc)
 
 /* Escape sequences */
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | UnicodeEscape
-StringEscape ::= Esc Esc | Esc '"' | UnicodeEscape
-UnicodeEscape ::= Esc 'u' HexDigit HexDigit HexDigit HexDigit
-                | Esc 'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
-HexDigit ::= [0-9a-fA-F]
-
-/* Comments */
-DocComment ::= '/**' CommentBody? '*/'
-AnyComment ::= '/*' ((AnyChar - '*') CommentBody)? '*/'
-CommentBody ::= AnyChar* - (AnyChar* '*/' AnyChar*)
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+StringEscape ::= Esc Esc | Esc '"'
 
 /* WhiteSpace */
-WhiteSpace ::= #x9 | #xD | #xA | #x20
+WhiteSpace ::= #x9 | #xD | #xA | #x20 /* ws: definition */

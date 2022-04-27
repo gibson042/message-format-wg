@@ -5,6 +5,7 @@
 
 |   Date   | Description |
 |----------|-------------|
+|2022-04-27|Remove all comments and UnicodeEscape.|
 |2022-04-15|Rename aliases to local variables.|
 |2022-04-15|Allow empty placeables.|
 |2022-04-15|Use {a}{/a} for markup elements.|
@@ -58,7 +59,6 @@
     1. [Names](#names)
     1. [Quoted Strings](#quoted-strings)
     1. [Escape Sequences](#escape-sequences)
-    1. [Comments](#comments)
     1. [Whitespace](#whitespace)
 1. [Complete EBNF](#complete-ebnf)
 
@@ -228,26 +228,19 @@ A message defining two local variables:
 
 A complex message with 2 selectors and 3 local variable definitions:
 
-    /*** A notification message shown to the user when one of their connections
-     * organizes a party and at least one guest is also a user's connection. */
     {
         {$host: gender}
         {$guestOther: number}
 
-        /** The host's first name. */
         $hostName = {$host: person firstName=long}
-        /** The first guest's first name. */
         $guestName = {$guest: person firstName=long}
-        /** The number of guests excluding the first guest. */
-        $guestsOther = {$guestCount: number /* Remove 1 from $guestCount */ offset=1}
+        $guestsOther = {$guestCount: number offset=1}
     }
-        /* The host is female. */
         female 0 [{$hostName} does not give a party.]
         female 1 [{$hostName} invites {$guestName} to her party.]
         female 2 [{$hostName} invites {$guestName} and one other person to her party.]
         female _ [{$hostName} invites {$guestName} and {$guestsOther} other people to her party.]
 
-        /* The host is male. */
         male 0 [{$hostName} does not give a party.]
         male 1 [{$hostName} invites {$guestName} to his party.]
         male 2 [{$hostName} invites {$guestName} and one other person to his party.]
@@ -323,7 +316,7 @@ A single message consists of an optional preamble,
 and one or more variants which represent the translatable body of the message.
 
 ```ebnf
-Message ::= DocComment? Preamble? Variant+
+Message ::= Preamble? Variant+
 ```
 
 ### Preamble
@@ -334,7 +327,7 @@ A selector can be optionally bound to a local variable, which may then be used i
 
 ```ebnf
 Preamble ::= '{' Selector* '}'
-Selector ::= DocComment? (Variable '=')? '{' Expression '}'
+Selector ::= (Variable '=')? '{' Expression '}'
 ```
 
 Examples:
@@ -391,10 +384,9 @@ Examples:
 ### Placeables
 
 A placeable is a placeholder for an expression or an open or close markup element.
-A placeable can be empty to allow the `{/* ... */}` syntax for inline comments.
 
 ```ebnf
-Placeable ::= '{' (Expression | MarkupStart | MarkupEnd)? '}'
+Placeable ::= '{' (Expression | MarkupStart | MarkupEnd) '}'
 ```
 
 ### Expressions
@@ -531,28 +523,8 @@ They are allowed in translatable text as well as in string literals.
 
 ```ebnf
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | UnicodeEscape
-StringEscape ::= Esc Esc | Esc '"' | UnicodeEscape
-UnicodeEscape ::= Esc 'u' HexDigit HexDigit HexDigit HexDigit
-                | Esc 'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
-HexDigit ::= [0-9a-fA-F]
-```
-
-### Comments
-
-Comments are delimited with `/*` at the start, and `*/` at the end,
-and can contain any Unicode codepoint including line breaks.
-Comments can only appear outside translatable text,
-and are completely ignored at runtime.
-
-Comments that start with `/**` are documentation comments
-and can only appear in front of the preamble,
-or inside the preamble in front of selectors.
-
-```ebnf
-DocComment ::= '/**' CommentBody? '*/'
-AnyComment ::= '/*' ((AnyChar - '*') CommentBody)? '*/'
-CommentBody ::= AnyChar* - (AnyChar* '*/' AnyChar*)
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+StringEscape ::= Esc Esc | Esc '"'
 ```
 
 ### Whitespace
@@ -573,11 +545,11 @@ The following EBNF uses the [W3C flavor](https://www.w3.org/TR/xml/#sec-notation
 The grammar is an LL(1) grammar without backtracking.
 
 ```ebnf
-Message ::= DocComment? Preamble? Variant+
+Message ::= Preamble? Variant+
 
 /* Preamble */
 Preamble ::= '{' Selector* '}'
-Selector ::= DocComment? (Variable '=')? '{' Expression '}'
+Selector ::= (Variable '=')? '{' Expression '}'
 
 /* Variants and Patterns */
 Variant ::= VariantKey* Pattern
@@ -598,7 +570,7 @@ MarkupStart ::= Name Option*
 MarkupEnd ::= '/' Name
 
 /* Ignored tokens */
-Ignore ::= AnyComment | WhiteSpace /* ws: definition */
+Ignore ::= WhiteSpace /* ws: definition */
 
 <?TOKENS?>
 
@@ -625,16 +597,8 @@ StringChar ::= AnyChar - ('"'| Esc)
 
 /* Escape sequences */
 Esc ::= '\'
-TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{' | UnicodeEscape
-StringEscape ::= Esc Esc | Esc '"' | UnicodeEscape
-UnicodeEscape ::= Esc 'u' HexDigit HexDigit HexDigit HexDigit
-                | Esc 'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
-HexDigit ::= [0-9a-fA-F]
-
-/* Comments */
-DocComment ::= '/**' CommentBody? '*/'
-AnyComment ::= '/*' ((AnyChar - '*') CommentBody)? '*/'
-CommentBody ::= AnyChar* - (AnyChar* '*/' AnyChar*)
+TextEscape ::= Esc Esc | Esc '[' | Esc ']' | Esc '{'
+StringEscape ::= Esc Esc | Esc '"'
 
 /* WhiteSpace */
 WhiteSpace ::= #x9 | #xD | #xA | #x20
