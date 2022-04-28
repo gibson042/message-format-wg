@@ -1,69 +1,34 @@
 # MessageFormat 2.0 Syntax
 
-<details>
-<summary>Changelog</summary>
-
-|   Date   | Description |
-|----------|-------------|
-|2022-04-27|Add plain messages.|
-|2022-04-27|Remove explicit braces from preamble.|
-|2022-04-27|Require escaping for `}` in message text.|
-|2022-04-27|Remove all comments and UnicodeEscape.|
-|2022-04-15|Rename aliases to local variables.|
-|2022-04-15|Allow empty placeables.|
-|2022-04-15|Use {a}{/a} for markup elements.|
-|2022-04-14|Use : as the function call syntax; remove function name sigils.|
-|2022-04-13|Remove TopComment.|
-|2022-04-13|Add the preamble, simplify aliases.|
-|2022-04-13|Remove phrases (sub-messages).|
-|2022-02-18|Prefix function names with @.|
-|2022-02-16|Remove number literals after all.|
-|2022-01-30|Add message-level comments and alias doc comments.|
-|2022-01-30|Readd number literals and remove nmtokens. Allow standalone functions.|
-|2022-01-29|Split symbols into names and nmtokens|
-|2022-01-28|Add aliases to phrases|
-|2022-01-28|Forbid selector-less variants|
-|2022-01-28|Split declarations into aliases and selectors|
-|2022-01-28|Remove standalone functions|
-|2022-01-27|Remove number literals and relax symbol's grammar|
-|2022-01-27|Change opt:value to opt=value|
-|2022-01-26|Specify symbols more precisely. Restrict whitespace.|
-|2022-01-26|Add `/*...*/` comments|
-|2022-01-25|Add `"..."` string literals and literal formatters|
-|2022-01-25|Specify escape sequences|
-|2022-01-25|Initial design|
-
-</details>
-
 ## Table of Contents
 
 1. [Introduction](#introduction)
-    1. [Design Goals](#design-goals)
-    1. [Design Restrictions](#design-restrictions)
+   1. [Design Goals](#design-goals)
+   1. [Design Restrictions](#design-restrictions)
 1. [Overview & Examples](#overview--examples)
-    1. [Simple Messages](#simple-messages)
-    1. [Simple Placeholders](#simple-placeholders)
-    1. [Formatting Functions](#formatting-functions)
-    1. [Markup Elements](#markup-elements)
-    1. [Selection](#selection)
-    1. [Local Variables](#local-variables)
-    1. [Complex Messages](#complex-messages)
+   1. [Simple Messages](#simple-messages)
+   1. [Simple Placeholders](#simple-placeholders)
+   1. [Formatting Functions](#formatting-functions)
+   1. [Markup Elements](#markup-elements)
+   1. [Selection](#selection)
+   1. [Local Variables](#local-variables)
+   1. [Complex Messages](#complex-messages)
 1. [Comparison with ICU MessageFormat 1.0](#comparison-with-icu-messageformat-10)
 1. [Productions](#productions)
-    1. [Message](#message)
-    1. [Plain](#plain)
-    1. [Preamble](#preamble)
-    1. [Variants](#variants)
-    1. [Patterns](#patterns)
-    1. [Placeables](#placeables)
-    1. [Expressions](#expressions)
-    1. [Markup Elements](#markup-elements)
+   1. [Message](#message)
+   1. [Plain](#plain)
+   1. [Preamble](#preamble)
+   1. [Variants](#variants)
+   1. [Patterns](#patterns)
+   1. [Placeables](#placeables)
+   1. [Expressions](#expressions)
+   1. [Markup Elements](#markup-elements)
 1. [Tokens](#tokens)
-    1. [Text](#text)
-    1. [Names](#names)
-    1. [Quoted Strings](#quoted-strings)
-    1. [Escape Sequences](#escape-sequences)
-    1. [Whitespace](#whitespace)
+   1. [Text](#text)
+   1. [Names](#names)
+   1. [Quoted Strings](#quoted-strings)
+   1. [Escape Sequences](#escape-sequences)
+   1. [Whitespace](#whitespace)
 1. [Complete EBNF](#complete-ebnf)
 
 ## Introduction
@@ -84,16 +49,16 @@ The design goals of the syntax specification are as follows:
    that is ubiquitous in the localization tooling today,
    and increase the chance of adoption.
 
-    * _Non-Goal_: Be backwards-compatible with the ICU MessageFormat 1.0 syntax.
+   - _Non-Goal_: Be backwards-compatible with the ICU MessageFormat 1.0 syntax.
 
 1. The syntax inside translatable content should be easy to understand for humans.
    This includes making it clear which parts of the message body _are_ translatable content,
    which parts inside it are placeholders,
    as well as making the selection logic predictable and easy to reason about.
 
-    * _Non-Goal_: Make the syntax intuitive enough for non-technical translators to hand-edit.
-      Instead, we assume that most translators will work with MessageFormat 2.0
-      by means of GUI tooling, CAT workbenches etc.
+   - _Non-Goal_: Make the syntax intuitive enough for non-technical translators to hand-edit.
+     Instead, we assume that most translators will work with MessageFormat 2.0
+     by means of GUI tooling, CAT workbenches etc.
 
 1. The syntax surrounding translatable content should be easy to write and edit
    for developers, localization engineers, and easy to parse by machines.
@@ -135,8 +100,8 @@ app.greetings.hello = Hello, world!
 The same message defined inline in JavaScript:
 
 ```js
-let hello = new MessageFormat("Hello, world!");
-hello.format();
+let hello = new MessageFormat('Hello, world!')
+hello.format()
 ```
 
 ### Simple Placeholders
@@ -155,8 +120,8 @@ app.greetings.hello = [Hello, {$userName}!]
 The same message defined inline in JavaScript:
 
 ```js
-let hello = new MessageFormat("[Hello, {$userName}!]");
-hello.format({userName: "Anne"});
+let hello = new MessageFormat('[Hello, {$userName}!]')
+hello.format({ userName: 'Anne' })
 ```
 
 ### Formatting Functions
@@ -264,23 +229,25 @@ MessageFormat 2.0 improves upon the ICU MessageFormat 1.0 syntax through the fol
    variants can only be defined at the top level of the message,
    thus precluding any possible nestedness of expressions.
 
-    ICU MessageFormat 1.0:
-    ```
-    {foo, func,
-        foo1 {Value 1},
-        foo2 {
-            {bar, func,
-                bar1 {Value 2a}
-                bar2 {Value 2b}}}}
-    ```
+   ICU MessageFormat 1.0:
 
-    MessageFormat 2.0:
-    ```
-    {$foo: func} {$bar: func}
-        foo1 [Value 1]
-        foo2 bar1 [Value 2a]
-        foo2 bar2 [Value 2b]
-    ```
+   ```
+   {foo, func,
+       foo1 {Value 1},
+       foo2 {
+           {bar, func,
+               bar1 {Value 2a}
+               bar2 {Value 2b}}}}
+   ```
+
+   MessageFormat 2.0:
+
+   ```
+   {$foo: func} {$bar: func}
+       foo1 [Value 1]
+       foo2 bar1 [Value 2a]
+       foo2 bar2 [Value 2b]
+   ```
 
 1. MessageFormat 2.0 differentiates between
    the syntax used to introduce expressions (`{...}`) and
@@ -292,15 +259,17 @@ MessageFormat 2.0 improves upon the ICU MessageFormat 1.0 syntax through the fol
    The purpose of this change is to help disambiguate between
    the different parts of a placeholder (variable references, function names, literals etc.).
 
-    ICU MessageFormat 1.0:
-    ```
-    {when, date, short}
-    ```
+   ICU MessageFormat 1.0:
 
-    MessageFormat 2.0:
-    ```
-    {$when: date style=short}
-    ```
+   ```
+   {when, date, short}
+   ```
+
+   MessageFormat 2.0:
+
+   ```
+   {$when: date style=short}
+   ```
 
 1. MessageFormat 2.0 doesn't provide the `#` shorthand inside variants.
    Instead it allows local variables to be defined in the preamble,
@@ -370,8 +339,8 @@ VariantKey ::= String | Nmtoken
 
 A well-formed message is considered valid if the following requirements are satisfied:
 
-* The number of keys on each variant must be fewer or equal to the number of selectors defined in the preamble.
-* At least one variant's keys must all be equal to the catch-all key (`_`).
+- The number of keys on each variant must be fewer or equal to the number of selectors defined in the preamble.
+- At least one variant's keys must all be equal to the catch-all key (`_`).
 
 ### Patterns
 
@@ -379,15 +348,15 @@ A pattern is a sequence of translatable elements.
 Patterns are always delimited with `[` at the start, and `]` at the end.
 This serves 3 purposes:
 
-* The message should be unambiguously embeddable in various container formats
+- The message should be unambiguously embeddable in various container formats
   regardless of the container's whitespace trimming rules.
   E.g. in Java `.properties` files,
   `hello = [Hello]` will unambiguously define the `Hello` message without the space in front of it.
-* The message should be conveniently embeddable in various programming languages
+- The message should be conveniently embeddable in various programming languages
   without the need to escape characters commonly related to strings, e.g. `"` and `'`.
   Such need may still occur when a singe or double quote is
   used in the translatable content or to delimit a string literal.
-* The syntax should make it as clear as possible which parts of the message body
+- The syntax should make it as clear as possible which parts of the message body
   are translatable and which ones are part of the formatting logic definition.
 
 ```ebnf
